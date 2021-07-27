@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.pylab import rcParams
 
 from pandas.plotting import register_matplotlib_converters
+
 register_matplotlib_converters()
 
 rcParams['figure.figsize'] = 20, 10
@@ -39,4 +40,35 @@ df.index = df['Date']
 
 # Line chart for data we have thus far
 plt.plot(df['Close/Last'], label='Close Price History')
+
+# Data Preparation
+df = df.sort_index(ascending=True, axis=0)
+
+data = pd.DataFrame(index=range(0, len(df)), columns=['Date', 'Close/Last'])
+
+for i in range(0, len(data)):
+    data['Date'][i] = df['Date'][i]
+    data['Close/Last'][i] = df['Close/Last'][i]
+
+print(data.head())
+
+
+# Min-Max Scaler
+scaler = MinMaxScaler(feature_range=(0, 1))
+
+data.index = data.Date
+data.drop('Date', axis=1, inplace=True)
+
+final_data = data.values
+train_data = final_data[0:200, :]
+valid_data = final_data[0:200, :]
+
+
+scaled_data = scaler.fit_transform(final_data)
+x_train_data, y_train_data = [],[]
+for i in range(60, len(train_data)):
+    x_train_data.append(scaled_data[i-60: i, 0])
+    y_train_data.append(scaled_data[i, 0])
+
+
 plt.show()
